@@ -5,7 +5,8 @@ let url = "https://www.mockachino.com/cf1c1dda-4681-4f/sebastian";
 let btnCarrito = document.querySelector('.button-carrito');
 let cards ;
 let botonesCompra;
-
+let carrito;
+let idAgregado = [];
 const storage = [];
 //Mostrar los productos.
 const mostrarProductos = () => { 
@@ -45,9 +46,9 @@ const seleccionarProducto = (botonesCompra) => {
     }
 } 
 cargarYMostrarCarro = () => {  
-    let carrito = document.querySelector ('.carritoDeCompra')
+    carrito = document.querySelector ('.carritoDeCompra')
     carrito.classList.add ('mostrarCarrito')
-    let recuperoStorage = sessionStorage.getItem('carrito')
+    let recuperoStorage = localStorage.getItem('carrito')
     let productos = JSON.parse(recuperoStorage)       
     carrito.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="bi bi-x-square svg" >
     <path d="M14 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h12zM2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2z"/>
@@ -67,75 +68,103 @@ cargarYMostrarCarro = () => {
         <div class="price-cart">$${price}</div>
         </article>`
     }
-    let cerrarCarrito = document.querySelector('.svg');
     let totalCarro = document.querySelector('.totalCarrito');
     let vaciar = document.querySelector('.vaciarCarrito');
     let confirmar = document.querySelector('.confirmarCarrito');
-
+    let cerrarCarrito = document.querySelector('.svg');
     
     cerrarCarrito.onclick = () =>{
         carrito.classList.remove ('mostrarCarrito')
     }
+    
+    
+    
     confirmar.onclick = () =>{
         swal({
             title: `Perfecto! Tu compra está hecha.`,
             icon: 'success',
             confirmButtonText: 'Cool'
         })
+    }
+    
+    
+    vaciar.onclick = () =>{
+        carrito.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="bi bi-x-square svg" >
+        <path d="M14 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h12zM2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2z"/>
+        <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>
+        </svg>
+        <div class="botonesCarro">
+        <button class="vaciarCarrito">Vaciar</button>
+        <p class="totalCarrito"></p>
+        <button class="confirmarCarrito">Confirmar</button>
+        </div>`; 
+        localStorage.removeItem('carrito');
+        carrito.classList.remove ('mostrarCarrito');
 
     }
 }
 //Mostrar detalles de compra.
 const mostrarDetalle = (numProd, detalle) =>{
-       let card = cards[numProd-1]
-       const{img, title, price, id} = card
-       
-       detalle.innerHTML =`<div class="caja">
-       <div class="divImg">
-       <img ${img} class="imgDetalle">
-       </div>
-       <p class="titleDetalle">${title}</p>
-       <p class="priceDetalle">$${price}</p>
-       <div class="contador">
-       <span class="menos">-</span>
-       <span class="resultado">1</span>
-       <span class="mas">+</span>
-       </div>
-       <div class="decision">
-       <button class="cancelar">Cancelar</button>    
-       <button class="aceptar">Aceptar</button>
-       </div>
-       </div>`
-       
-       const cancelar = document.querySelector('.cancelar')
-       const menos = document.querySelector('.menos')
-       let resultado = document.querySelector('.resultado')
-       const mas = document.querySelector('.mas')
-       const agregarAlCarrito = document.querySelector('.aceptar')
-       let contador = 1
-       
-       menos.onclick = () => {
-           contador--
-           //console.log(contador)
-           contador = contador < 1 ? 1 : contador
-           resultado.innerText = contador
-       }
-       mas.onclick = () => {
-           contador++
-           contador = contador > 10 ? 10 : contador
-           resultado.innerText = contador
-       }
-       cancelar.onclick = () => {
-           detalle.classList.add('hidden')
-       }
-       
-       agregarAlCarrito.onclick = () => {
-            card.enCarrito = contador  
-            storage.push(card)
-            sessionStorage.setItem('carrito', JSON.stringify(storage))
+    let recuperoStorage = localStorage.getItem('carrito')
+    let productos = JSON.parse(recuperoStorage)
+    let cantidadProductos = 1;
+    let card = cards[numProd-1];
+    const{img, title, price, id} = card;
+
+    /* for (let tarjeta of productos) {
+        if (tarjeta.id == numProd) {
+            cantidadProductos = tarjeta.enCarrito   
+        }
+    }  */
+    
+        detalle.innerHTML =`<div class="caja">
+            <div class="divImg">
+            <img ${img} class="imgDetalle">
+            </div>
+            <p class="titleDetalle">${title}</p>
+            <p class="priceDetalle">$${price}</p>
+            <div class="contador">
+            <span class="menos">-</span>
+            <span class="resultado">${cantidadProductos}</span>
+            <span class="mas">+</span>
+            </div>
+            <div class="decision">
+            <button class="cancelar">Cancelar</button>    
+            <button class="aceptar">Aceptar</button>
+            </div>
+            </div>`
+
+
+        
+        const cancelar = document.querySelector('.cancelar')
+        const menos = document.querySelector('.menos')
+        let resultado = document.querySelector('.resultado')
+        const mas = document.querySelector('.mas')
+        const agregarAlCarrito = document.querySelector('.aceptar')
+        let contador = 1
+        
+        menos.onclick = () => {
+            contador--
+            //console.log(contador)
+            contador = contador < 1 ? 1 : contador
+            resultado.innerText = contador
+        }
+        mas.onclick = () => {
+            contador++
+            contador = contador > 10 ? 10 : contador
+            resultado.innerText = contador
+        }
+        cancelar.onclick = () => {
             detalle.classList.add('hidden')
-            cargarYMostrarCarro()
-       } 
+        }
+        
+        agregarAlCarrito.onclick = () => {
+                card.enCarrito = contador  
+                storage.push(card)
+                localStorage.setItem('carrito', JSON.stringify(storage))
+                detalle.classList.add('hidden')
+                cargarYMostrarCarro()
+        } 
    } 
 
 //Abrir carro.
