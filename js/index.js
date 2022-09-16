@@ -8,7 +8,7 @@ let botonesCompra;
 let carrito;
 let idAgregado = [];
 localStorage.removeItem('carrito');
-const storage = [];
+let storage = [];
 //Mostrar los productos.
 const mostrarProductos = () => { 
     fetch(url)
@@ -102,6 +102,7 @@ cargarYMostrarCarro = () => {
         <button class="confirmarCarrito">Confirmar</button>
         </div>`; 
         localStorage.removeItem('carrito');
+        storage = [];
         carrito.classList.remove ('mostrarCarrito');
 
     }
@@ -184,37 +185,20 @@ const mostrarDetalle = (numProd, detalle) =>{
         }
         
         agregarAlCarrito.onclick = () => {
-            debugger;
                 card.enCarrito = contador;
-
-
-               if (storage.length != 0) {
                 for (articulo of storage) {
                     let articuloAgregado = articulo.id;
-                    console.log(articuloAgregado);
                     if (card.id == articuloAgregado) {
                         let index = storage.indexOf(card);
-                        storage.splice(index, 1, card);
-                        localStorage.setItem('carrito', JSON.stringify(storage));
-                        detalle.classList.add('hidden');
-                        cargarYMostrarCarro();
-                        break;
-                    }else{
-                        storage.push(card);
-                        localStorage.setItem('carrito', JSON.stringify(storage));
-                        detalle.classList.add('hidden');
-                        cargarYMostrarCarro();
+                        storage.splice(index, 1);
                     }
                 }
-               }else{
                 storage.push(card);
                 localStorage.setItem('carrito', JSON.stringify(storage));
                 detalle.classList.add('hidden');
                 cargarYMostrarCarro();
                }     
-        } 
-   } 
-
+            }  
 //Abrir carro.
 
 btnCarrito.onclick = () =>{
