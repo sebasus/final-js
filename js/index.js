@@ -7,6 +7,7 @@ let cards ;
 let botonesCompra;
 let carrito;
 let idAgregado = [];
+localStorage.removeItem('carrito');
 const storage = [];
 //Mostrar los productos.
 const mostrarProductos = () => { 
@@ -59,8 +60,10 @@ cargarYMostrarCarro = () => {
     <p class="totalCarrito"></p>
     <button class="confirmarCarrito">Confirmar</button>
     </div>`; 
+    
     for (let producto of productos) {
         const {img, title, price, id, enCarrito} = producto
+
         carrito.innerHTML += `<article class="card-cart" id="${id}">
         <div class="img-cart"><img class="miniatura" ${img} alt=""></div>
         <p class="title-cart">${title}</p>
@@ -105,43 +108,65 @@ cargarYMostrarCarro = () => {
 }
 //Mostrar detalles de compra.
 const mostrarDetalle = (numProd, detalle) =>{
-    let recuperoStorage = localStorage.getItem('carrito')
-    let productos = JSON.parse(recuperoStorage)
+    
+    let recuperoStorage = localStorage.getItem('carrito');
+    let productos = JSON.parse(recuperoStorage);
     let cantidadProductos = 1;
     let card = cards[numProd-1];
     const{img, title, price, id} = card;
-
-    /* for (let tarjeta of productos) {
-        if (tarjeta.id == numProd) {
-            cantidadProductos = tarjeta.enCarrito   
-        }
-    }  */
     
+    if (!productos) {
         detalle.innerHTML =`<div class="caja">
-            <div class="divImg">
-            <img ${img} class="imgDetalle">
-            </div>
-            <p class="titleDetalle">${title}</p>
-            <p class="priceDetalle">$${price}</p>
-            <div class="contador">
-            <span class="menos">-</span>
-            <span class="resultado">${cantidadProductos}</span>
-            <span class="mas">+</span>
-            </div>
-            <div class="decision">
-            <button class="cancelar">Cancelar</button>    
-            <button class="aceptar">Aceptar</button>
-            </div>
-            </div>`
-
-
+        <div class="divImg">
+        <img ${img} class="imgDetalle">
+        </div>
+        <p class="titleDetalle">${title}</p>
+        <p class="priceDetalle">$${price}</p>
+        <div class="contador">
+        <span class="menos">-</span>
+        <span class="resultado">${cantidadProductos}</span>
+        <span class="mas">+</span>
+        </div>
+        <div class="decision">
+        <button class="cancelar">Cancelar</button>    
+        <button class="aceptar">Aceptar</button>
+        </div>
+        </div>`
+    } else {
+        
+        for (let tarjeta of productos) {
+            if (tarjeta.id == numProd) {
+                console.log(tarjeta.id);
+                cantidadProductos = tarjeta.enCarrito
+                  
+            }
+        }  
+        console.log(cantidadProductos);
+           detalle.innerHTML =`<div class="caja">
+                <div class="divImg">
+                <img ${img} class="imgDetalle">
+                </div>
+                <p class="titleDetalle">${title}</p>
+                <p class="priceDetalle">$${price}</p>
+                <div class="contador">
+                <span class="menos">-</span>
+                <span class="resultado">${cantidadProductos}</span>
+                <span class="mas">+</span>
+                </div>
+                <div class="decision">
+                <button class="cancelar">Cancelar</button>    
+                <button class="aceptar">Aceptar</button>
+                </div>
+                </div>`
+        
+            } 
         
         const cancelar = document.querySelector('.cancelar')
         const menos = document.querySelector('.menos')
         let resultado = document.querySelector('.resultado')
         const mas = document.querySelector('.mas')
         const agregarAlCarrito = document.querySelector('.aceptar')
-        let contador = 1
+        let contador = cantidadProductos;
         
         menos.onclick = () => {
             contador--
@@ -159,11 +184,34 @@ const mostrarDetalle = (numProd, detalle) =>{
         }
         
         agregarAlCarrito.onclick = () => {
-                card.enCarrito = contador  
-                storage.push(card)
-                localStorage.setItem('carrito', JSON.stringify(storage))
-                detalle.classList.add('hidden')
-                cargarYMostrarCarro()
+            debugger;
+                card.enCarrito = contador;
+
+
+               if (storage.length != 0) {
+                for (articulo of storage) {
+                    let articuloAgregado = articulo.id;
+                    console.log(articuloAgregado);
+                    if (card.id == articuloAgregado) {
+                        let index = storage.indexOf(card);
+                        storage.splice(index, 1, card);
+                        localStorage.setItem('carrito', JSON.stringify(storage));
+                        detalle.classList.add('hidden');
+                        cargarYMostrarCarro();
+                        break;
+                    }else{
+                        storage.push(card);
+                        localStorage.setItem('carrito', JSON.stringify(storage));
+                        detalle.classList.add('hidden');
+                        cargarYMostrarCarro();
+                    }
+                }
+               }else{
+                storage.push(card);
+                localStorage.setItem('carrito', JSON.stringify(storage));
+                detalle.classList.add('hidden');
+                cargarYMostrarCarro();
+               }     
         } 
    } 
 
